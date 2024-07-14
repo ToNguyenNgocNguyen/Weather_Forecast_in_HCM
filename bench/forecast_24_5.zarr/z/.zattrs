@@ -1,0 +1,9 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "prediction_timedelta",
+        "level",
+        "latitude",
+        "longitude"
+    ]
+}

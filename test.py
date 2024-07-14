@@ -60,7 +60,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--device", default="GPU", type=str, choices=["GPU", "CPU"])
     parser.add_argument("--model_name", type=str)
-    parser.add_argument("--lead_time", default=24,type=int, help="Must be a multiple of 24, such as 24, 48, n * 24.")
     opt = parser.parse_args()
 
     test_set = DatasetFromFolder("data", "test")
@@ -76,9 +75,7 @@ if __name__ == "__main__":
 
     DEVICE = opt.device
     MODEL_NAME = opt.model_name
-    LEAD_TIME = opt.lead_time
     is_gpu = True if DEVICE == "GPU" else False
-    assert LEAD_TIME % 24 == 0, "Must be a multiple of 24, such as 24, 48, n * 24."
 
     pangu_lite = Pangu_lite()
     pangu_lite.eval()
@@ -88,8 +85,6 @@ if __name__ == "__main__":
         surface_mask = surface_mask.cuda()
     else:
         pangu_lite.load_state_dict(torch.load(MODEL_NAME, map_location=lambda storage, loc: storage))
-
-    num_iterations = LEAD_TIME // 24
 
     test_bar = tqdm(test_loader)
     output_list = []
@@ -103,10 +98,8 @@ if __name__ == "__main__":
             input_surface = input_surface.cuda()
             input_upper_air = input_upper_air.cuda()
 
-        for _ in range(num_iterations):
-            output_surface, output_upper_air = pangu_lite(input_surface, surface_mask, input_upper_air)
-            input_surface = output_surface
-            input_upper_air = output_upper_air
+        
+        output_surface, output_upper_air = pangu_lite(input_surface, surface_mask, input_upper_air)
 
         init_time = times.squeeze(0)[0].item()
         output_surface = surface_invTrans(output_surface).squeeze(0)  # C Lat Lon
@@ -126,7 +119,6 @@ if __name__ == "__main__":
                 "level": pLevels, 
                 "latitude": lat, 
                 "longitude": lon, 
-                "prediction_timedelta": np.array([num_iterations]), 
                 "time": np.array([init_time])
             }
         )
@@ -135,10 +127,10 @@ if __name__ == "__main__":
 
         if len(output_list) >= 30:
             forecast_ds = xr.concat(output_list, dim="time")
-            forecast_ds.to_zarr(os.path.join(save_root, f"forecast_{LEAD_TIME}_{split}.zarr"))
+            forecast_ds.to_zarr(os.path.join(save_root, f"forecast_24_{split}.zarr"))
 
             split += 1
             output_list = []
 
     forecast_ds = xr.concat(output_list, dim="time")
-    forecast_ds.to_zarr(os.path.join(save_root, f"forecast_{LEAD_TIME}_{split}.zarr"))
+    forecast_ds.to_zarr(os.path.join(save_root, f"forecast_24_{split}.zarr"))

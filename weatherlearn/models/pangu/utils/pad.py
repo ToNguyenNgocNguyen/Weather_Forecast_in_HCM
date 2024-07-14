@@ -33,17 +33,3 @@ def get_pad3d(input_resolution, window_size):
 
     return padding_left, padding_right, padding_top, padding_bottom, padding_front, padding_back
 
-
-def get_pad2d(input_resolution, window_size):
-    """
-    Args:
-        input_resolution (tuple[int]): Lat, Lon
-        window_size (tuple[int]): Lat, Lon
-
-    Returns:
-        padding (tuple[int]): (padding_left, padding_right, padding_top, padding_bottom)
-    """
-    input_resolution = [2] + list(input_resolution)
-    window_size = [2] + list(window_size)
-    padding = get_pad3d(input_resolution, window_size)
-    return padding[: 4]

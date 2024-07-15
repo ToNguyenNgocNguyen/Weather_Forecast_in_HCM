@@ -18,9 +18,9 @@ from data_utils import DatasetFromFolder
 parser = argparse.ArgumentParser(description="Train Pangu_lite Models")
 parser.add_argument("--num_epochs", default=25, type=int, help="train epoch number")
 parser.add_argument("--num_workers", default=4, type=int, help="number of workers")
-parser.add_argument("--lr", default=5e-4, type=float, help="learning rate")
+parser.add_argument("--lr", default=1e-4, type=float, help="learning rate")
 parser.add_argument('--pin_memory', default=False, type=bool, help="pin memory")
-parser.add_argument('--weight_decay', default=3e-6, type=float, help="weight decay")
+parser.add_argument('--weight_decay', default=1e-3, type=float, help="weight decay")
 
 
 
